@@ -1,0 +1,6 @@
+Contents:
+- Filename: /dev/ttyS0
+  Type: character device node
+  Devmajor: 4
+  Devminor: 64
+  Mode: 0660

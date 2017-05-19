@@ -1,0 +1,64 @@
+.\"             -*-Nroff-*-
+.\"
+.TH "metatar" 1 "15 May 2017" "" ""
+.SH NAME
+metatar \- edit metadata in tar files
+.SH SYNOPSIS
+.B metatar
+.sp
+metatar -s tarfile yamlfile
+.sp
+metatar -a tarfile yamlfile newtarfile
+.SH DESCRIPTION
+Extract and apply metadata to tarfiles.
+.SH OPTIONS
+.TP
+.B \-v or \-\-version
+displays the current version number
+.TP
+.B \-h or \-\-help
+displays brief usage information
+.TP
+.B \-s or \-\-save
+extracts metadata given an input tar filename and an output yaml filename
+.TP
+.B \-a or \-\-apply
+applies metadata to a new tar file given an input tar filename and an input yaml filename
+.TP
+.B \-l or \-\-list
+lists the contents of a tar file
+.TP
+.B \-y or \-\-yaml
+output YAML metadata to standard out given an input tar filename
+.TP
+.B \-f or \-\-force
+use together with \-\-save or \-\-apply to overwrite existing files
+.TP
+.B \-g or \-\-generate
+convert YAML metadata to a new tar file, without using a tar file as the basis
+.TP
+.B \-m or \-\-merge
+merge two YAML files into a new YAML file. The second overrides the first.
+.TP
+.B \-c or \-\-cpio
+use together with -apply to create a cpio file instead of a tar file
+.TP
+.PP
+.SH "WHY"
+.sp
+MetaTAR can extract metadata from a tar archive and save it as a YAML file.
+.sp
+The YAML file can then be edited and applied to the original tar archive, in order to produce a new tar archive with changed metadata.
+.sp
+This can be useful for creating filesystem images with device files without having to use fakeroot and mknod.
+.sp
+It's also useful for checking in data about file owners and permissions into git. It makes it easier to compare changes and see who changed what.
+.SH "SEE ALSO"
+.BR tar (1)
+.SH BUGS
+Only unknown bugs so far. Bugs can be reported at https://github.com/xyproto/metatar/issues.
+.SH VERSION
+1.4
+.SH AUTHOR
+.B metatar
+was written by Alexander F Rødseth <rodseth@gmail.com>

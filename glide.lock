@@ -1,0 +1,23 @@
+hash: 49b6a610a6e64c272ec8b6f44a28458be373e4858de568c10c93b0839f25ea8e
+updated: 2017-05-09T09:27:42.97413599Z
+imports:
+- name: github.com/docopt/docopt-go
+  version: 784ddc588536785e7299f7272f39101f7faccc3f
+- name: github.com/fatih/color
+  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+- name: github.com/mattn/go-colorable
+  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+  repo: https://github.com/mattn/go-colorable
+- name: github.com/mattn/go-isatty
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+  repo: https://github.com/mattn/go-isatty
+- name: github.com/surma/gocpio
+  version: fcb68777e7dc4ea43ffce871b552c0d073c17495
+- name: github.com/xyproto/yaml
+  version: fe7d63e22dd09d944fd1e62357b98d017d0500bd
+- name: golang.org/x/sys
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  repo: https://go.googlesource.com/sys
+  subpackages:
+  - unix
+testImports: []

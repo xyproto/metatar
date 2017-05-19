@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Create release tarballs/zip for 64-bit linux, BSD and Plan9 + 64-bit ARM + raspberry pi 2/3 + Windows
+#
+name=metatar
+version=$(grep -i version main.go | head -1 | cut -d' ' -f3)
+echo 'Compiling...'
+export GOARCH=amd64
+echo '* Linux'
+GOOS=linux go build -o metatar.linux
+echo '* macOS'
+GOOS=darwin go build -o metatar.macos
+echo '* Plan9'
+GOOS=plan9 go build -o metatar.plan9
+echo '* FreeBSD'
+GOOS=freebsd go build -o metatar.freebsd
+echo '* NetBSD'
+GOOS=netbsd go build -o metatar.netbsd
+echo '* Dragonfly'
+GOOS=dragonfly go build -o metatar.dragonfly
+echo '* OpenBSD'
+GOOS=openbsd go build -o metatar.openbsd
+echo '* Windows'
+GOOS=windows go build -o metatar.exe
+echo '* Linux ARM64'
+GOOS=linux GOARCH=arm64 go build -o metatar.linux_arm64
+echo '* RPI 2/3'
+GOOS=linux GOARCH=arm GOARM=6 go build -o metatar.rpi
+# Compress the Windows release
+echo "Compressing $name-$version.zip"
+mkdir "$name-$version"
+cp $name.exe LICENSE "$name-$version/"
+zip -q -r "$name-$version.zip" "$name-$version/"
+rm -r "$name-$version"
+rm $name.exe
+# Compress the other tarballs
+for p in linux macos plan9 freebsd netbsd dragonfly openbsd linux_arm64 rpi; do
+  echo "Compressing $name-$version.$p.tar.xz"
+  mkdir "$name-$version-$p"
+  cp $name.$p LICENSE "$name-$version-$p/"
+  cp $name.1.wip "$name-$version-$p/$name.1"
+  gzip "$name-$version-$p/$name.1"
+  tar Jcf "$name-$version.$p.tar.xz" "$name-$version-$p/"
+  rm -r "$name-$version-$p"
+  rm $name.$p
+done

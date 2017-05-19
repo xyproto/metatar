@@ -1,0 +1,22 @@
+MetaTAR Version: 0.94
+Contents:
+- Filename: test/
+  Type: directory
+  Mode: 0750
+- Filename: test/bin
+  Linkname: usr/bin
+  Type: symlink
+  Mode: 0750
+- Filename: test/bin/hi
+  Rename: test/usr/bin/hi
+  Type: regular file
+  Mode: 0750
+  Size: 18
+  Body: IyEvYmluL3NoCmVjaG8gaGkK
+- Filename: test/usr/
+  Type: directory
+  Mode: 0750
+- Filename: test/usr/bin/
+  Type: directory
+  Mode: 0750
+

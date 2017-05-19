@@ -1,0 +1,8 @@
+package: github.com/xyproto/metatar
+import:
+- package: github.com/docopt/docopt-go
+  version: ^0.6.2
+- package: github.com/fatih/color
+  version: ^1.4.1
+- package: github.com/xyproto/yaml
+  version: ^1.0.0
