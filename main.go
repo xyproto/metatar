@@ -189,7 +189,7 @@ func Typeflag2cpio(tf byte) int64 {
 	case tar.TypeLink:
 		// Hard linked files are stored as the original file in CPIO
 		// TODO: Document that hard linked files that are not regular files are not supported
-		fmt.Fprint(os.Stderr, "Warning: Hard links are not supported")
+		fmt.Fprintln(os.Stderr, "Warning: Hard links in CPIO archives are not supported")
 		return cpio.TYPE_SYMLINK
 	case tar.TypeSymlink:
 		return cpio.TYPE_SYMLINK
