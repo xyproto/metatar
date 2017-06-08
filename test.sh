@@ -3,7 +3,7 @@ set -e
 scriptdir=$(dirname $0)
 export LC_ALL=POSIX
 
-./metatar --version || (go build; ./metatar --version)
+./metatar --version 2>/dev/null || (go build; ./metatar --version)
 
 # YAML -> TAR
 echo -ne 'Testing tar file generation:\tYAML -> TAR...\t\t'
