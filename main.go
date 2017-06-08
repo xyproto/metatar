@@ -26,7 +26,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.4
+	metatarVersion = 1.5
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
@@ -132,6 +132,7 @@ type MetaFileExpanded struct {
 type MetaArchiveRegular struct {
 	Version  float64           `yaml:"MetaTAR Version"`
 	Contents []MetaFileRegular `yaml:"Contents"`
+	SkipList []string          `yaml:"SkipList,omitempty"`
 }
 
 // MetaArchiveExpanded represents all the metadata in a tar file.
@@ -140,6 +141,7 @@ type MetaArchiveRegular struct {
 type MetaArchiveExpanded struct {
 	Version  float64            `yaml:"MetaTAR Version"`
 	Contents []MetaFileExpanded `yaml:"Contents"`
+	SkipList []string           `yaml:"SkipList,omitempty"`
 }
 
 // Typeflag2string converts a given tar filetype byte to a string
@@ -726,6 +728,9 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 
 	// Loop through the files in the metadata and write the corresponding file to the tar
 	for _, mf := range mfs.Contents {
+		if hasl(mfs.SkipList, mf.Filename) {
+			mf.Skip = true
+		}
 		if mf.Skip {
 			if verbose {
 				fmt.Printf("%s: skipping %s\n", filepath.Base(yamlfilename), mf.Filename)
@@ -1144,6 +1149,15 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 	return nil
 }
 
+func hasl(l []string, e string) bool {
+	for _, x := range l {
+		if x == e {
+			return true
+		}
+	}
+	return false
+}
+
 func has(m map[string]bool, e string) bool {
 	if _, ok := m[e]; ok {
 		return true
@@ -1244,6 +1258,9 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 
 	// Loop through the files in the metadata and write the corresponding file to the tar
 	for _, mf := range mfs.Contents {
+		if hasl(mfs.SkipList, mf.Filename) {
+			mf.Skip = true
+		}
 		addFileToCPIO(cw, MetaFileExpanded(mf), tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, true, noskip)
 	}
 
@@ -1271,6 +1288,9 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 		} else if !isRenamed && !isDone && !autocreatedDirectory && !isSkipped {
 			if verbose {
 				fmt.Printf("%s: found no metadata for %s\n", filepath.Base(yamlfilename), filename)
+			}
+			if hasl(mfs.SkipList, mf.Filename) {
+				mf.Skip = true
 			}
 			addFileToCPIO(cw, mf, tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, false, noskip)
 		}
@@ -1343,6 +1363,9 @@ func MergeMetadata(yamlfilename1, yamlfilename2, newfilename string, force, verb
 
 	// Use mfs1.Contents as the basis
 	for _, mf := range mfs1.Contents {
+		if hasl(mfs1.SkipList, mf.Filename) {
+			mf.Skip = true
+		}
 		if mf.Skip {
 			if verbose {
 				fmt.Printf("%s: skipping %s\n", filepath.Base(yamlfilename1), mf.Filename)
@@ -1362,6 +1385,9 @@ func MergeMetadata(yamlfilename1, yamlfilename2, newfilename string, force, verb
 	// Loop through the files in the metadata 2 and apply to the new contents
 UP:
 	for _, mf := range mfs2.Contents {
+		if hasl(mfs2.SkipList, mf.Filename) {
+			mf.Skip = true
+		}
 		if mf.Skip {
 			if verbose {
 				fmt.Printf("%s: skipping %s\n", filepath.Base(yamlfilename2), mf.Filename)
