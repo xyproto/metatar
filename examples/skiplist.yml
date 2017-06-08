@@ -1,0 +1,8 @@
+SkipList: [missing.txt, alsomissing.txt]
+Contents:
+- Filename: hello.txt
+  Body: SGVsbG8sIFdvcmxkIQo=
+- Filename: missing.txt
+  Body: SGVsbG8sIFdvcmxkIQo=
+- Filename: alsomissing.txt
+  Body: SGVsbG8sIFdvcmxkIQo=

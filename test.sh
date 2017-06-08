@@ -78,4 +78,27 @@ else
   exit 1
 fi
 
-
+# YAML -> TAR with skiplist
+echo -ne 'Testing SkipList:\t'
+./metatar -g "$scriptdir/examples/skiplist.yml" skiplist.tar
+if [[ -f hello.txt ]]; then
+  echo "Error: hello.txt should be missing before starting the test"
+  exit 1
+fi
+rm -f hello.txt
+tar xf skiplist.tar
+rm -f skiplist.tar
+if [[ ! -f hello.txt ]]; then
+  echo "Error: hello.txt should exist"
+  exit 1
+fi
+rm -f hello.txt
+if [[ -f missing.txt ]]; then
+  echo "Error: missing.txt should not exist"
+  exit 1
+fi
+if [[ -f alsomissing.txt ]]; then
+  echo "Error: alsomissing.txt should not exist"
+  exit 1
+fi
+echo ok
