@@ -26,7 +26,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.5
+	metatarVersion = 1.6
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
@@ -71,7 +71,7 @@ Possible values for the 'type:' field in the YAML file:
 Possible commands for files in the YAML file:
   "Skip: true", for skipping the file when writing the new archive file.
   "Rename: newfilename.txt", for renaming a file.
-  "Strip: true", for stripping newlines.
+  "StripEmptyLines: true", for stripping newlines.
   "StripComments: true", for stripping lines beginning with "#" (but not #!).
 `
 )
@@ -85,45 +85,45 @@ type Xattr struct {
 // MetaFileRegular represents all metadata for a file in a tar archive.
 // "omitempty" is used to omit several fields that are normally empty.
 type MetaFileRegular struct {
-	Filename      string     `yaml:"Filename"`
-	Skip          bool       `yaml:"Skip,omitempty"`   // For skipping files
-	Rename        string     `yaml:"Rename,omitempty"` // For renaming files + altering metadata
-	Linkname      string     `yaml:"Linkname,omitempty"`
-	Strip         bool       `yaml:"Strip,omitempty"`         // For stripping empty lines
-	StripComments bool       `yaml:"StripComments,omitempty"` // For stripping comments
-	Type          string     `yaml:"Type"`
-	Mode          yaml.Octal `yaml:"Mode"`
-	UID           int        `yaml:"UID"`
-	GID           int        `yaml:"GID"`
-	Username      string     `yaml:"Username"`
-	Groupname     string     `yaml:"Groupname"`
-	Devmajor      int64      `yaml:"Devmajor,omitempty"`
-	Devminor      int64      `yaml:"Devminor,omitempty"`
-	BodySize      int        `yaml:"Size,omitempty"` // size of decoded file body
-	Body          string     `yaml:"Body,omitempty"` // base64 encoded file body
-	Xattrs        []Xattr    `yaml:"Xattrs,omitempty"`
+	Filename        string     `yaml:"Filename"`
+	Skip            bool       `yaml:"Skip,omitempty"`   // For skipping files
+	Rename          string     `yaml:"Rename,omitempty"` // For renaming files + altering metadata
+	Linkname        string     `yaml:"Linkname,omitempty"`
+	StripEmptyLines bool       `yaml:"StripEmptyLines,omitempty"` // For stripping empty lines
+	StripComments   bool       `yaml:"StripComments,omitempty"`   // For stripping comments
+	Type            string     `yaml:"Type"`
+	Mode            yaml.Octal `yaml:"Mode"`
+	UID             int        `yaml:"UID"`
+	GID             int        `yaml:"GID"`
+	Username        string     `yaml:"Username"`
+	Groupname       string     `yaml:"Groupname"`
+	Devmajor        int64      `yaml:"Devmajor,omitempty"`
+	Devminor        int64      `yaml:"Devminor,omitempty"`
+	BodySize        int        `yaml:"Size,omitempty"` // size of decoded file body
+	Body            string     `yaml:"Body,omitempty"` // base64 encoded file body
+	Xattrs          []Xattr    `yaml:"Xattrs,omitempty"`
 }
 
 // MetaFileExpanded represents all metadata for a file in a tar archive.
 // Like MetaFile, but without the "omitempty" tag.
 type MetaFileExpanded struct {
-	Filename      string     `yaml:"Filename"`
-	Skip          bool       `yaml:"Skip"`   // For skipping files
-	Rename        string     `yaml:"Rename"` // For renaming files + altering metadata
-	Linkname      string     `yaml:"Linkname"`
-	Strip         bool       `yaml:"Strip"`         // For stripping empty lines
-	StripComments bool       `yaml:"StripComments"` // For stripping comments
-	Type          string     `yaml:"Type"`
-	Mode          yaml.Octal `yaml:"Mode"`
-	UID           int        `yaml:"UID"`
-	GID           int        `yaml:"GID"`
-	Username      string     `yaml:"Username"`
-	Groupname     string     `yaml:"Groupname"`
-	Devmajor      int64      `yaml:"Devmajor"`
-	Devminor      int64      `yaml:"Devminor"`
-	BodySize      int        `yaml:"Size"` // size of decoded file body
-	Body          string     `yaml:"Body"` // base64 encoded file body
-	Xattrs        []Xattr    `yaml:"Xattrs,flow"`
+	Filename        string     `yaml:"Filename"`
+	Skip            bool       `yaml:"Skip"`   // For skipping files
+	Rename          string     `yaml:"Rename"` // For renaming files + altering metadata
+	Linkname        string     `yaml:"Linkname"`
+	StripEmptyLines bool       `yaml:"StripEmptyLines"` // For stripping empty lines
+	StripComments   bool       `yaml:"StripComments"`   // For stripping comments
+	Type            string     `yaml:"Type"`
+	Mode            yaml.Octal `yaml:"Mode"`
+	UID             int        `yaml:"UID"`
+	GID             int        `yaml:"GID"`
+	Username        string     `yaml:"Username"`
+	Groupname       string     `yaml:"Groupname"`
+	Devmajor        int64      `yaml:"Devmajor"`
+	Devminor        int64      `yaml:"Devminor"`
+	BodySize        int        `yaml:"Size"` // size of decoded file body
+	Body            string     `yaml:"Body"` // base64 encoded file body
+	Xattrs          []Xattr    `yaml:"Xattrs,flow"`
 }
 
 // MetaArchiveRegular represents all the metadata in a tar file.
@@ -799,7 +799,7 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 			}
 		}
 
-		if mf.Strip {
+		if mf.StripEmptyLines {
 			// Strip empty lines from the data in bodymap[mf.Filename]
 			s := string(bodymap[mf.Filename])
 			regex, err := regexp.Compile("\n\n")
@@ -1000,7 +1000,7 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		}
 	}
 
-	if mf.Strip {
+	if mf.StripEmptyLines {
 		// TODO: Check if mf.Filename exists in bodymap
 		// Strip empty lines from the data in bodymap[mf.Filename]
 		s := string(bodymap[mf.Filename])
