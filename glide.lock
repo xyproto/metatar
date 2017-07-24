@@ -1,10 +1,10 @@
 hash: 49b6a610a6e64c272ec8b6f44a28458be373e4858de568c10c93b0839f25ea8e
-updated: 2017-05-09T09:27:42.97413599Z
+updated: 2017-07-24T10:25:09.126832637Z
 imports:
 - name: github.com/docopt/docopt-go
   version: 784ddc588536785e7299f7272f39101f7faccc3f
 - name: github.com/fatih/color
-  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
