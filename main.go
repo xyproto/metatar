@@ -1284,7 +1284,7 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 		//fmt.Printf("autodir=%v\tmeta=%v\tdone=%v\trename=%v\tfilename=%s\n", autocreatedDirectory, hasMetadata, isDone, isRenamed, filename)
 
 		if isDone && !hasMetadata {
-			quit(fmt.Sprintf("internal error: %s is in donemap but not in metamap!", filename))
+			quit(fmt.Sprintf("metatar: %s is in %s, but the file itself is missing!", filename, yamlfilename))
 		} else if !isRenamed && !isDone && !autocreatedDirectory && !isSkipped {
 			if verbose {
 				fmt.Printf("%s: found no metadata for %s\n", filepath.Base(yamlfilename), filename)
