@@ -17,6 +17,7 @@ import (
 
 	"github.com/docopt/docopt-go"
 	"github.com/fatih/color"
+	"github.com/gobwas/glob"
 	"github.com/surma/gocpio"
 	"github.com/xyproto/yaml"
 )
@@ -26,7 +27,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.6
+	metatarVersion = 1.7
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
@@ -58,7 +59,7 @@ Options:
   -m --merge       Merge two YAML files. Let the second file override the first.
   -c --cpio        Output a cpio/newc file instead of tar.
   -n --nouser      Don't output User, Group, UID and GID fields.
-  -o --noskip      Don't skip empty files.
+  -o --noskip      Don't skip empty regular files.
 
 Possible values for the 'type:' field in the YAML file:
   "regular file"		"regular file (A)"			"hard link"
@@ -664,7 +665,7 @@ func ListCPIO(filename string) error {
 
 // ApplyMetadataToTar takes a tar archive and a YAML metadata file. It then applies
 // all the metadata to the tar archive contents and outputs a new tar archive.
-func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, withBody, verbose, noskip bool) error {
+func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, withBody, verbose, skipEmptyFiles bool) error {
 
 	// Read the metadata
 	yamldata, err := ioutil.ReadFile(yamlfilename)
@@ -728,7 +729,8 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 
 	// Loop through the files in the metadata and write the corresponding file to the tar
 	for _, mf := range mfs.Contents {
-		if hasl(mfs.SkipList, mf.Filename) {
+		emptyRegularFile := false
+		if hasl(mfs.SkipList, mf.Filename) || hasglob(mfs.SkipList, mf.Filename) {
 			mf.Skip = true
 		}
 		if mf.Skip {
@@ -744,6 +746,10 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 			continue
 		}
 		if _, ok := bodymap[mf.Filename]; !ok {
+			emptyRegularFile = len(bodymap[mf.Filename]) == 0 && (mf.Type == "regular file" || mf.Type == "regular file (A)")
+			if emptyRegularFile && skipEmptyFiles {
+				continue
+			}
 			if verbose {
 				user := mf.Username
 				if user == "" {
@@ -753,12 +759,8 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 				if group == "" {
 					group = strconv.Itoa(mf.GID)
 				}
-				if len(bodymap[mf.Filename]) == 0 && (mf.Type == "regular file" || mf.Type == "regular file (A)") {
-					if noskip {
-						fmt.Printf("%s: creating empty file %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
-					} else {
-						continue
-					}
+				if emptyRegularFile {
+					fmt.Printf("%s: creating empty file %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
 				} else {
 					fmt.Printf("%s: create %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
 				}
@@ -802,9 +804,9 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 		if mf.StripEmptyLines {
 			// Strip empty lines from the data in bodymap[mf.Filename]
 			s := string(bodymap[mf.Filename])
-			regex, err := regexp.Compile("\n\n")
+			re, err := regexp.Compile("\n\n")
 			check(err)
-			bodymap[mf.Filename] = []byte(regex.ReplaceAllString(s, "\n"))
+			bodymap[mf.Filename] = []byte(re.ReplaceAllString(s, "\n"))
 		}
 
 		if mf.StripComments {
@@ -853,12 +855,17 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 		for _, xattr := range mf.Xattrs {
 			hdr.Xattrs[xattr.Key] = xattr.Value
 		}
-		if err := tw.WriteHeader(hdr); err != nil {
-			return err
+
+		// Extra skip check before writing header and body
+		if !(skipEmptyFiles && emptyRegularFile) {
+			if err := tw.WriteHeader(hdr); err != nil {
+				return err
+			}
+			if _, err := tw.Write(bodymap[mf.Filename]); err != nil {
+				return err
+			}
 		}
-		if _, err := tw.Write(bodymap[mf.Filename]); err != nil {
-			return err
-		}
+
 		donemap[mf.Filename] = true
 	}
 	if err := tw.Close(); err != nil {
@@ -891,7 +898,8 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 // withBody is if the file body from the metadata should be used, if present.
 // verbose gives more verbose output along the way.
 // Returns nil if everything worked out fine.
-func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilename string, bodymap map[string][]byte, metamap map[string]MetaFileExpanded, skipmap, donemap, renmap, dirmap map[string]bool, mtime int64, withBody, verbose, declaredInYAML, noskip bool) error {
+func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilename string, bodymap map[string][]byte, metamap map[string]MetaFileExpanded, skipmap, donemap, renmap, dirmap map[string]bool, mtime int64, withBody, verbose, declaredInYAML, skipEmptyFiles bool) error {
+	emptyRegularFile := false
 	if mf.Skip {
 		if verbose {
 			fmt.Printf("%s: skip %s\n", filepath.Base(yamlfilename), mf.Filename)
@@ -906,6 +914,11 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		return nil
 	}
 	if _, ok := bodymap[mf.Filename]; !ok {
+		emptyRegularFile = len(bodymap[mf.Filename]) == 0 && (mf.Type == "regular file" || mf.Type == "regular file (A)")
+		if emptyRegularFile && skipEmptyFiles {
+			// Skip empty regular files
+			return nil
+		}
 		if verbose {
 			user := mf.Username
 			if user == "" {
@@ -915,13 +928,8 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 			if group == "" {
 				group = strconv.Itoa(mf.GID)
 			}
-			if len(bodymap[mf.Filename]) == 0 && (mf.Type == "regular file" || mf.Type == "regular file (A)") {
-				if noskip {
-					fmt.Printf("%s: creating empty file %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
-				} else {
-					// Skip empty regular files
-					return nil
-				}
+			if emptyRegularFile {
+				fmt.Printf("%s: creating empty file %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
 			} else {
 				fmt.Printf("%s: create %s (%s:%s, mode %s)\n", filepath.Base(yamlfilename), mf.Filename, user, group, mf.Mode)
 			}
@@ -940,6 +948,7 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 	if mf.Rename != "" {
 		headerFilename = mf.Rename
 		if _, ok := bodymap[mf.Rename]; ok {
+			emptyRegularFile = len(bodymap[mf.Rename]) == 0 && (mf.Type == "regular file" || mf.Type == "regular file (A)")
 			if verbose {
 				fmt.Printf("%s: when renaming %s to %s: %s already exists in %s!\n", filepath.Base(yamlfilename), mf.Filename, mf.Rename, mf.Rename, tarfilename)
 			}
@@ -1004,8 +1013,8 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		// TODO: Check if mf.Filename exists in bodymap
 		// Strip empty lines from the data in bodymap[mf.Filename]
 		s := string(bodymap[mf.Filename])
-		regex := regexp.MustCompile("\n\n")
-		bodymap[mf.Filename] = []byte(regex.ReplaceAllString(s, "\n"))
+		re := regexp.MustCompile("\n\n")
+		bodymap[mf.Filename] = []byte(re.ReplaceAllString(s, "\n"))
 	}
 
 	if mf.StripComments {
@@ -1129,26 +1138,30 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		return nil
 	}
 
-	// Write the header
-	if err := cw.WriteHeader(hdr); err != nil {
-		return err
-	}
-	// Write the body (or Linkname, if it is a symlink)
-	if hdr.Type == cpio.TYPE_SYMLINK {
-		// Write symbolink link Linknames to the file body
-		if _, err := cw.Write([]byte(mf.Linkname)); err != nil {
+	// Extra skip check
+	if !(skipEmptyFiles && emptyRegularFile) {
+		// Write the header
+		if err := cw.WriteHeader(hdr); err != nil {
 			return err
 		}
-	} else {
-		// Other file content is written to the file body too
-		if _, err := cw.Write(bodymap[mf.Filename]); err != nil {
-			return err
+		// Write the body (or Linkname, if it is a symlink)
+		if hdr.Type == cpio.TYPE_SYMLINK {
+			// Write symbolink link Linknames to the file body
+			if _, err := cw.Write([]byte(mf.Linkname)); err != nil {
+				return err
+			}
+		} else {
+			// Other file content is written to the file body too
+			if _, err := cw.Write(bodymap[mf.Filename]); err != nil {
+				return err
+			}
 		}
 	}
 	donemap[mf.Filename] = true
 	return nil
 }
 
+// Given a slice of strings and a string, figure out if the string is present
 func hasl(l []string, e string) bool {
 	for _, x := range l {
 		if x == e {
@@ -1158,6 +1171,19 @@ func hasl(l []string, e string) bool {
 	return false
 }
 
+// Given a slice of strings that are regular expressions, and a string, figure out if the string matches any of the regular expressions
+func hasglob(l []string, e string) bool {
+	for _, globexpr := range l {
+		g, err := glob.Compile(globexpr)
+		check(err)
+		if g.Match(e) {
+			return true
+		}
+	}
+	return false
+}
+
+// Given a map of string->bool and a string, figure out if the string is present as a key in the map
 func has(m map[string]bool, e string) bool {
 	if _, ok := m[e]; ok {
 		return true
@@ -1165,6 +1191,7 @@ func has(m map[string]bool, e string) bool {
 	return false
 }
 
+// Given a map of string->MetaFileExpanded and a string, figure out if the string is present as a key in the map
 func hasm(m map[string]MetaFileExpanded, e string) bool {
 	if _, ok := m[e]; ok {
 		return true
@@ -1172,6 +1199,7 @@ func hasm(m map[string]MetaFileExpanded, e string) bool {
 	return false
 }
 
+// Given a map of string->[]byte and a string, figure out if the string is present as a key in the map
 func hasb(m map[string][]byte, e string) bool {
 	if _, ok := m[e]; ok {
 		return true
@@ -1182,7 +1210,7 @@ func hasb(m map[string][]byte, e string) bool {
 // ApplyMetadataToCpio takes a tar archive and a YAML metadata file. It then applies
 // all the metadata to the tar archive contents and outputs a new tar archive.
 // root == True will not set alle file permissions to root, only the undeclared ones.
-func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, withBody, root, verbose, noskip bool) error {
+func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, withBody, root, verbose, skipEmptyFiles bool) error {
 
 	// Read the metadata
 	yamldata, err := ioutil.ReadFile(yamlfilename)
@@ -1258,10 +1286,10 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 
 	// Loop through the files in the metadata and write the corresponding file to the tar
 	for _, mf := range mfs.Contents {
-		if hasl(mfs.SkipList, mf.Filename) {
+		if hasl(mfs.SkipList, mf.Filename) || hasglob(mfs.SkipList, mf.Filename) {
 			mf.Skip = true
 		}
-		addFileToCPIO(cw, MetaFileExpanded(mf), tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, true, noskip)
+		addFileToCPIO(cw, MetaFileExpanded(mf), tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, true, skipEmptyFiles)
 	}
 
 	// List all files in bodymap but not in donemap (from the tar, but no YAML metadata)
@@ -1289,10 +1317,10 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 			if verbose {
 				fmt.Printf("%s: found no metadata for %s\n", filepath.Base(yamlfilename), filename)
 			}
-			if hasl(mfs.SkipList, mf.Filename) {
+			if hasl(mfs.SkipList, mf.Filename) || hasglob(mfs.SkipList, mf.Filename) {
 				mf.Skip = true
 			}
-			addFileToCPIO(cw, mf, tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, false, noskip)
+			addFileToCPIO(cw, mf, tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, false, skipEmptyFiles)
 		}
 	}
 
@@ -1363,7 +1391,7 @@ func MergeMetadata(yamlfilename1, yamlfilename2, newfilename string, force, verb
 
 	// Use mfs1.Contents as the basis
 	for _, mf := range mfs1.Contents {
-		if hasl(mfs1.SkipList, mf.Filename) {
+		if hasl(mfs1.SkipList, mf.Filename) || hasglob(mfs1.SkipList, mf.Filename) {
 			mf.Skip = true
 		}
 		if mf.Skip {
@@ -1385,7 +1413,7 @@ func MergeMetadata(yamlfilename1, yamlfilename2, newfilename string, force, verb
 	// Loop through the files in the metadata 2 and apply to the new contents
 UP:
 	for _, mf := range mfs2.Contents {
-		if hasl(mfs2.SkipList, mf.Filename) {
+		if hasl(mfs2.SkipList, mf.Filename) || hasglob(mfs2.SkipList, mf.Filename) {
 			mf.Skip = true
 		}
 		if mf.Skip {
@@ -1526,15 +1554,15 @@ func main() {
 	root := arguments["--root"].(bool)
 	writeCPIO := arguments["--cpio"].(bool)
 	nouser := arguments["--nouser"].(bool)
-	noskip := arguments["--noskip"].(bool)
+	skipEmptyFiles := !arguments["--noskip"].(bool)
 
 	if arguments["--apply"].(bool) {
 		if writeCPIO {
 			// Write a CPIO file
-			check(ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename, force, withBody, root, verbose, noskip))
+			check(ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename, force, withBody, root, verbose, skipEmptyFiles))
 		} else {
 			// Write a TAR file
-			check(ApplyMetadataToTar(tarfilename, yamlfilename, newfilename, force, withBody, verbose, noskip))
+			check(ApplyMetadataToTar(tarfilename, yamlfilename, newfilename, force, withBody, verbose, skipEmptyFiles))
 		}
 	} else if arguments["--list"].(bool) {
 		// Output contents of tar file
@@ -1547,7 +1575,7 @@ func main() {
 		check(WriteMetadata(tarfilename, "-", force, withBody, verbose, expand, root, nouser))
 	} else if arguments["--generate"].(bool) {
 		// Convert YAML to tar or cpio, always use "Body:", if present
-		check(ApplyMetadataToTar("", yamlfilename, newfilename, force, true, verbose, noskip))
+		check(ApplyMetadataToTar("", yamlfilename, newfilename, force, true, verbose, skipEmptyFiles))
 	} else if arguments["--merge"].(bool) {
 		check(MergeMetadata(yamlfilename1, yamlfilename2, newfilename, force, verbose))
 	} else if tarfilename != "" && yamlfilename != "" {
