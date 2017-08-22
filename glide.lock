@@ -1,10 +1,20 @@
 hash: 49b6a610a6e64c272ec8b6f44a28458be373e4858de568c10c93b0839f25ea8e
-updated: 2017-07-24T10:25:09.126832637Z
+updated: 2017-08-22T09:30:27.377863888Z
 imports:
 - name: github.com/docopt/docopt-go
   version: 784ddc588536785e7299f7272f39101f7faccc3f
 - name: github.com/fatih/color
   version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
+- name: github.com/gobwas/glob
+  version: 51eb1ee00b6d931c66d229ceeb7c31b985563420
+  subpackages:
+  - compiler
+  - match
+  - syntax
+  - syntax/ast
+  - syntax/lexer
+  - util/runes
+  - util/strings
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
