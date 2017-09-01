@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Script for finding double skips, for if filenames are skipped twice.
+#
+python3 py/dupliskip.py <permissions.yml

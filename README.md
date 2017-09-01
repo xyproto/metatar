@@ -16,10 +16,11 @@ Can list the contents of both tar and cpio (newc) files.
 
 Note that CPIO archives are ordered, and that files/directories must exist before relative symlinks to them appear in the archive.
 
+<!--
 ## Simple example
 
 <a href="https://asciinema.org/a/bmsk91mof9cl9ccra7jc7pcs9"><img src="https://raw.githubusercontent.com/xyproto/metatar/master/img/metatar.gif" style="margin-left: 2em" alt="asciinema screencast"></a>
-
+-->
 
 ## Quick installation
 
@@ -179,8 +180,12 @@ From `.yaml` to `.tar`:
 
     metatar -g data.yaml output.tar
 
+## Known issues
+
+* If files are added to the metadata, like for instance `usr/bin/filename`, then `usr/` and `/usr/bin/` are created automatically. However, if empty directories are added, the parent directories are not created automatically and has to be added manually to the metadata.
+
 ## General information
 
-* Version: 1.4
+* Version: 1.7
 * License: MIT
 * Author: Alexander F Rødseth

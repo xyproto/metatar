@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Script for checking if a given filename will be skipped
+#
+# Example: Check if atvdebug will be skipped:
+#          ./willskip atvdebug
+#
+if [[ $1 == "" ]]; then
+  echo
+  echo 'Willskip checks if the given filename will be skipped by permissions.yml'
+  echo 'Example: ./willskip atvdebug'
+  echo
+  echo '-l can be used to list all skipped files and glob expressions'
+  echo 'Example: ./willskip -l'
+  echo
+  exit 1
+fi
+python3 py/willskip.py $1 <permissions.yml

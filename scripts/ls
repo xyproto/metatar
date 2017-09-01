@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import yaml
+
+fs = "{0:14} {1:4} {2:4} {3:4} {4:4} {5:30} {6:10}"
+
+def rights(mode, ftype):
+    s = ""
+    if "regular" in ftype:
+        s += "-"
+    elif ftype == "directory":
+        s += "d"
+    elif "link" in ftype:
+        s += "l"
+    else:
+        # ?
+        s += "-"
+    for rightnum in map(int, list(oct(mode)[2:])):
+        read = (rightnum & 4) != 0
+        write = (rightnum & 2) != 0
+        execute = (rightnum & 1) != 0
+        if read:
+            s += "r"
+        else:
+            s += "-"
+        if write:
+            s += "w"
+        else:
+            s += "-"
+        if execute:
+            s += "x"
+        else:
+            s += "-"
+    return s
+
+def ls(entry):
+    fn = entry["Filename"]
+    if "Rename" in entry:
+        fn = entry["Rename"]
+    mode = "0644"
+    if "Mode" in entry:
+        mode = entry["Mode"]
+    ftype = "regular file"
+    if "Type" in entry:
+        ftype = entry["Type"]
+    user = "user"
+    if "User" in entry:
+        user = entry["Username"]
+    elif "UID" in entry:
+        user = str(entry["UID"])
+    group = "group"
+    if "Grup" in entry:
+        group = entry["Groupname"]
+    elif "GID" in entry:
+        group = str(entry["GID"])
+    if user == "0":
+        user = "root"
+    if group == "0":
+        group = "root"
+    devmajor = " "
+    devminor = " "
+    if "Devmajor" in entry:
+        devmajor = entry["Devmajor"]
+        devminor = 0
+    if "Devminor" in entry:
+        devminor = entry["Devminor"]
+    link = ""
+    if "Linkname" in entry:
+        link = "-> " + entry["Linkname"]
+    if not fn.startswith("/"):
+        fn = "/" + fn
+    print(fs.format(rights(mode, ftype), user, group, devmajor, devminor, fn, link))
+
+def main():
+    print(fs.format("rights", "user", "group", "devmaj", "devmin", "filename", "link"))
+    with open("permissions.yml") as data:
+        try:
+            document = yaml.load(data)
+            for entry in document["Contents"]:
+                if "Skip" in entry and entry["Skip"]:
+                    continue
+                ls(entry)
+        except yaml.YAMLError as err:
+            print(err)
+
+if __name__ == "__main__":
+    main()

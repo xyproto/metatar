@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Script for skipping filenames by search string
+#
+# Example: Skip all filenames containing "mouse"
+#          ./skip mouse
+#
+if [[ $1 == "" ]]; then
+  echo 'Needs a search word for which filenames to skip.'
+  echo 'Example: ./skip mouse'
+  exit 1
+fi
+python3 py/skip.py $1 <permissions.yml >permissions2.yml
+mv -f permissions2.yml permissions.yml
+echo git diff permissions.yml

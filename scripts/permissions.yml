@@ -1,0 +1,28 @@
+#
+# Example permissions.yml file
+#
+MetaTAR Version: 1.7
+Contents:
+- Filename: example.txt
+  Type: regular file
+  Mode: 0555
+  Username: root
+  Groupname: root
+- Filename: error.log
+  Type: regular file
+  Mode: 0555
+  Username: root
+  Groupname: root
+- Filename: var/tmp/warning.log
+  Type: regular file
+  Mode: 0555
+  Username: root
+  Groupname: root
+- Filename: output.log
+  Type: regular file
+  Mode: 0555
+  Username: root
+  Groupname: root
+SkipList:
+- "*error.log"
+- var/tmp/warning.log
