@@ -27,7 +27,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.7
+	metatarVersion = 1.8
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
@@ -972,12 +972,12 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 			dirname := filepath.Clean(filepath.Dir(headerFilename))
 			headerDirname := dirname + "/"
 			if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
-				//if verbose {
-				//	fmt.Printf("%s: missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
-				//}
+				if verbose {
+					fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+				}
 				dirhdr := &cpio.Header{
 					Name:     headerDirname,
-					Mode:     0755,
+					Mode:     0555,
 					Uid:      mf.UID,
 					Gid:      mf.GID,
 					Mtime:    mtime,
@@ -1092,9 +1092,12 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
 			// it's a relative link
 			headerDirname := dirname + "/"
+			if verbose {
+				fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+			}
 			dirhdr := &cpio.Header{
 				Name:     headerDirname,
-				Mode:     0755,
+				Mode:     0555,
 				Uid:      mf.UID,
 				Gid:      mf.GID,
 				Mtime:    mtime,
@@ -1115,9 +1118,12 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		dirname := filepath.Clean(filepath.Dir(headerFilename))
 		headerDirname := dirname + "/"
 		if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
+			if verbose {
+				fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+			}
 			dirhdr := &cpio.Header{
 				Name:     headerDirname,
-				Mode:     0755,
+				Mode:     0555,
 				Uid:      mf.UID,
 				Gid:      mf.GID,
 				Mtime:    mtime,

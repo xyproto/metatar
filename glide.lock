@@ -1,5 +1,5 @@
 hash: 49b6a610a6e64c272ec8b6f44a28458be373e4858de568c10c93b0839f25ea8e
-updated: 2017-08-22T09:30:27.377863888Z
+updated: 2017-09-11T08:13:50.696158228Z
 imports:
 - name: github.com/docopt/docopt-go
   version: 784ddc588536785e7299f7272f39101f7faccc3f
