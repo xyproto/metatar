@@ -27,7 +27,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.8
+	metatarVersion = 1.9
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
@@ -135,6 +135,8 @@ type MetaArchiveRegular struct {
 	Contents []MetaFileRegular `yaml:"Contents"`
 	SkipList []string          `yaml:"SkipList,omitempty"`
 }
+
+type ShouldSkipFunc func(string) bool
 
 // MetaArchiveExpanded represents all the metadata in a tar file.
 // Everything but the actual file contents.
@@ -898,7 +900,7 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 // withBody is if the file body from the metadata should be used, if present.
 // verbose gives more verbose output along the way.
 // Returns nil if everything worked out fine.
-func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilename string, bodymap map[string][]byte, metamap map[string]MetaFileExpanded, skipmap, donemap, renmap, dirmap map[string]bool, mtime int64, withBody, verbose, declaredInYAML, skipEmptyFiles bool) error {
+func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilename string, bodymap map[string][]byte, metamap map[string]MetaFileExpanded, skipmap, donemap, renmap, dirmap map[string]bool, mtime int64, withBody, verbose, declaredInYAML, skipEmptyFiles bool, ssf ShouldSkipFunc) error {
 	emptyRegularFile := false
 	if mf.Skip {
 		if verbose {
@@ -972,23 +974,25 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 			dirname := filepath.Clean(filepath.Dir(headerFilename))
 			headerDirname := dirname + "/"
 			if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
-				if verbose {
-					fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+				if !ssf(headerDirname) {
+					if verbose {
+						fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+					}
+					dirhdr := &cpio.Header{
+						Name:     headerDirname,
+						Mode:     0555,
+						Uid:      mf.UID,
+						Gid:      mf.GID,
+						Mtime:    mtime,
+						Size:     0, // Get size from corresponding file in tarfilename
+						Devmajor: 0,
+						Devminor: 0,
+						Type:     cpio.TYPE_DIR,
+					}
+					cw.WriteHeader(dirhdr)
+					dirmap[dirname] = true
+					donemap[dirname] = true
 				}
-				dirhdr := &cpio.Header{
-					Name:     headerDirname,
-					Mode:     0555,
-					Uid:      mf.UID,
-					Gid:      mf.GID,
-					Mtime:    mtime,
-					Size:     0, // Get size from corresponding file in tarfilename
-					Devmajor: 0,
-					Devminor: 0,
-					Type:     cpio.TYPE_DIR,
-				}
-				cw.WriteHeader(dirhdr)
-				dirmap[dirname] = true
-				donemap[dirname] = true
 			}
 
 		}
@@ -1092,23 +1096,25 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
 			// it's a relative link
 			headerDirname := dirname + "/"
-			if verbose {
-				fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+			if !ssf(headerDirname) {
+				if verbose {
+					fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+				}
+				dirhdr := &cpio.Header{
+					Name:     headerDirname,
+					Mode:     0555,
+					Uid:      mf.UID,
+					Gid:      mf.GID,
+					Mtime:    mtime,
+					Size:     0, // Get size from corresponding file in tarfilename
+					Devmajor: 0,
+					Devminor: 0,
+					Type:     cpio.TYPE_DIR,
+				}
+				cw.WriteHeader(dirhdr)
+				dirmap[dirname] = true
+				donemap[dirname] = true
 			}
-			dirhdr := &cpio.Header{
-				Name:     headerDirname,
-				Mode:     0555,
-				Uid:      mf.UID,
-				Gid:      mf.GID,
-				Mtime:    mtime,
-				Size:     0, // Get size from corresponding file in tarfilename
-				Devmajor: 0,
-				Devminor: 0,
-				Type:     cpio.TYPE_DIR,
-			}
-			cw.WriteHeader(dirhdr)
-			dirmap[dirname] = true
-			donemap[dirname] = true
 		}
 
 		// If the type is a symlink set the body size to the length of the Linkname as bytes
@@ -1118,23 +1124,25 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		dirname := filepath.Clean(filepath.Dir(headerFilename))
 		headerDirname := dirname + "/"
 		if _, ok := dirmap[dirname]; !(ok || strings.HasPrefix(dirname, ".") || strings.HasPrefix(dirname, "/")) {
-			if verbose {
-				fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+			if !ssf(headerDirname) {
+				if verbose {
+					fmt.Printf("%s: creating missing directory for \"%s\" (renamed from %s) in CPIO, creating: %s\n", filepath.Base(yamlfilename), headerFilename, mf.Filename, headerDirname)
+				}
+				dirhdr := &cpio.Header{
+					Name:     headerDirname,
+					Mode:     0555,
+					Uid:      mf.UID,
+					Gid:      mf.GID,
+					Mtime:    mtime,
+					Size:     0,
+					Devmajor: 0,
+					Devminor: 0,
+					Type:     cpio.TYPE_DIR,
+				}
+				cw.WriteHeader(dirhdr)
+				dirmap[dirname] = true
+				donemap[dirname] = true
 			}
-			dirhdr := &cpio.Header{
-				Name:     headerDirname,
-				Mode:     0555,
-				Uid:      mf.UID,
-				Gid:      mf.GID,
-				Mtime:    mtime,
-				Size:     0,
-				Devmajor: 0,
-				Devminor: 0,
-				Type:     cpio.TYPE_DIR,
-			}
-			cw.WriteHeader(dirhdr)
-			dirmap[dirname] = true
-			donemap[dirname] = true
 		}
 	}
 
@@ -1290,12 +1298,17 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 	// Choose a timestamp (seconds since epoch)
 	mtime := time.Now().Unix()
 
+	// "Should skip" function
+	ssf := func(filename string) bool {
+		return hasl(mfs.SkipList, filename) || hasglob(mfs.SkipList, filename)
+	}
+
 	// Loop through the files in the metadata and write the corresponding file to the tar
 	for _, mf := range mfs.Contents {
-		if hasl(mfs.SkipList, mf.Filename) || hasglob(mfs.SkipList, mf.Filename) {
+		if ssf(mf.Filename) {
 			mf.Skip = true
 		}
-		addFileToCPIO(cw, MetaFileExpanded(mf), tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, true, skipEmptyFiles)
+		addFileToCPIO(cw, MetaFileExpanded(mf), tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, true, skipEmptyFiles, ssf)
 	}
 
 	// List all files in bodymap but not in donemap (from the tar, but no YAML metadata)
@@ -1326,7 +1339,7 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 			if hasl(mfs.SkipList, mf.Filename) || hasglob(mfs.SkipList, mf.Filename) {
 				mf.Skip = true
 			}
-			addFileToCPIO(cw, mf, tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, false, skipEmptyFiles)
+			addFileToCPIO(cw, mf, tarfilename, yamlfilename, bodymap, metamap, skipmap, donemap, renmap, dirmap, mtime, withBody, verbose, false, skipEmptyFiles, ssf)
 		}
 	}
 
