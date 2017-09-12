@@ -136,6 +136,7 @@ type MetaArchiveRegular struct {
 	SkipList []string          `yaml:"SkipList,omitempty"`
 }
 
+// ShouldSkipFunc is a function that determines if a given filename should be skipped or not
 type ShouldSkipFunc func(string) bool
 
 // MetaArchiveExpanded represents all the metadata in a tar file.
