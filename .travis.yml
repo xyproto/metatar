@@ -1,13 +1,13 @@
 language: go
 
 go:
-  - 1.8
+  - 1.9
   - tip
 
 sudo: false
 
 install:
-  - curl -L -s https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz | tar zxC ./
+  - curl -L -s https://github.com/Masterminds/glide/releases/download/v0.13.1/glide-v0.13.1-linux-amd64.tar.gz | tar zxC ./
   - ./linux-amd64/glide install
 
 script:
