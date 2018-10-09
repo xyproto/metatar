@@ -61,14 +61,16 @@ Options:
   -r --root        Set all permissions to root, UID/GID 0
   -m --merge       Merge two YAML files. Let the second file override the first.
   -c --cpio        Output a cpio/newc file instead of tar.
+  -n --nouser      Don't output User, Group, UID and GID fields.
+  -o --noskip      Don't skip empty files.
 
 Possible values for the 'type:' field in the YAML file:
-	"regular file"				"regular file (A)"			"hard link"
-	"symlink"					"character device node"		"block device node"
-	"directory"					"fifo node"					"reserved"
-	"extended header"			"global extended header"	"sparse file"
-	"unknown tar entry"			"next file has a long name"
-	"next file symlinks to a file with a long name"
+  "regular file"		"regular file (A)"			"hard link"
+  "symlink"			"character device node"			"block device node"
+  "directory"			"fifo node"				"reserved"
+  "extended header"		"global extended header"		"sparse file"
+  "unknown tar entry"		"next file has a long name"
+  "next file symlinks to a file with a long name"
 
 Possible commands for files in the YAML file:
   "Skip: true", for skipping the file when writing the new archive file.
@@ -186,6 +188,7 @@ From `.yaml` to `.tar`:
 
 ## General information
 
-* Version: 1.7
+* Version: 1.8
 * License: MIT
-* Author: Alexander F Rødseth
+* Author: Alexander F. Rødseth
+
