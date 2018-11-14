@@ -26,7 +26,7 @@ Note that CPIO archives are ordered, and that files/directories must exist befor
 
 If you have a recent version of `go` installed:
 
-    go get github.com/xyproto/metatar
+    go get -u github.com/xyproto/metatar
 
 ## Usage information
 
