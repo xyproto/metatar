@@ -12,7 +12,7 @@ It can also be used for converting a tar file to a standalone YAML file and back
 
 When applying metadata, a cpio (newc format) file can be produced instead.
 
-Can list the contents of both tar and cpio (newc) files.
+Metatar can list the contents of both tar and cpio (newc) files.
 
 Note that CPIO archives are ordered, and that files/directories must exist before relative symlinks to them appear in the archive.
 
