@@ -14,7 +14,7 @@ When applying metadata, a cpio (newc format) file can be produced instead.
 
 MetaTAR can list the contents of both tar and cpio (newc) files.
 
-Note that CPIO archives are ordered, and that files/directories must exist before relative symlinks to them appear in the archive.
+Note that CPIO archives are ordered, and that files/directories must exist before relative symlinks for them appear in the archive.
 
 <!--
 ## Simple example
