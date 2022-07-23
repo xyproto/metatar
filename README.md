@@ -1,4 +1,4 @@
-# MetaTAR [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/metatar?style=flat-square)](https://goreportcard.com/report/github.com/xyproto/metatar)
+# MetaTAR [![Software License](https://img.shields.io/badge/license-BSD-brightgreen.svg?style=flat-square)](LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/metatar?style=flat-square)](https://goreportcard.com/report/github.com/xyproto/metatar)
 
 MetaTAR can extract metadata from a tar archive and save it as a YAML file.
 
@@ -19,7 +19,7 @@ Note that CPIO archives are ordered, and that files/directories must exist befor
 <!--
 ## Simple example
 
-<a href="https://asciinema.org/a/bmsk91mof9cl9ccra7jc7pcs9"><img src="https://raw.githubusercontent.com/xyproto/metatar/master/img/metatar.gif" style="margin-left: 2em" alt="asciinema screencast"></a>
+<a href="https://asciinema.org/a/bmsk91mof9cl9ccra7jc7pcs9"><img src="https://raw.githubusercontent.com/xyproto/metatar/main/img/metatar.gif" style="margin-left: 2em" alt="asciinema screencast"></a>
 -->
 
 ## Quick installation
@@ -188,6 +188,6 @@ From `.yaml` to `.tar`:
 
 ## General information
 
-* Version: 1.8
-* License: MIT
+* Version: 1.8.0
+* License: BSD-3
 * Author: Alexander F. Rødseth
