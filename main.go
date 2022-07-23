@@ -18,7 +18,7 @@ import (
 	"github.com/docopt/docopt-go"
 	"github.com/fatih/color"
 	"github.com/gobwas/glob"
-	"github.com/surma/gocpio"
+	cpio "github.com/surma/gocpio"
 	"github.com/xyproto/yaml"
 )
 
@@ -74,6 +74,7 @@ Possible commands for files in the YAML file:
   "Rename: newfilename.txt", for renaming a file.
   "StripEmptyLines: true", for stripping newlines.
   "StripComments: true", for stripping lines beginning with "#" (but not #!).
+
 `
 )
 
@@ -1214,14 +1215,6 @@ func hasm(m map[string]MetaFileExpanded, e string) bool {
 	return false
 }
 
-// Given a map of string->[]byte and a string, figure out if the string is present as a key in the map
-func hasb(m map[string][]byte, e string) bool {
-	if _, ok := m[e]; ok {
-		return true
-	}
-	return false
-}
-
 // ApplyMetadataToCpio takes a tar archive and a YAML metadata file. It then applies
 // all the metadata to the tar archive contents and outputs a new tar archive.
 // root == True will not set alle file permissions to root, only the undeclared ones.
@@ -1501,7 +1494,7 @@ func main() {
 		var ok bool
 		yamlfilename, ok = arguments["<yamlfile>"].(string)
 		if !ok && arguments["<yamlfile>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if ok && (strings.HasSuffix(".yml", yamlfilename) || strings.HasSuffix(".yaml", yamlfilename)) {
 			// Filename is a string, but with the wrong extension
@@ -1515,7 +1508,7 @@ func main() {
 		var ok bool
 		yamlfilename1, ok = arguments["<yamlfile1>"].(string)
 		if !ok && arguments["<yamlfile1>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if ok && (strings.HasSuffix(".yml", yamlfilename1) || strings.HasSuffix(".yaml", yamlfilename1)) {
 			// Filename is a string, but with the wrong extension
@@ -1523,7 +1516,7 @@ func main() {
 		}
 		yamlfilename2, ok = arguments["<yamlfile2>"].(string)
 		if !ok && arguments["<yamlfile2>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if ok && (strings.HasSuffix(".yml", yamlfilename2) || strings.HasSuffix(".yaml", yamlfilename2)) {
 			// Filename is a string, but with the wrong extension
@@ -1536,7 +1529,7 @@ func main() {
 		var ok bool
 		tarfilename, ok = arguments["<tarfile>"].(string)
 		if !ok && arguments["<tarfile>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if !ok {
 			quit(fmt.Sprintf("Invalid input tar filename: %s", tarfilename))
@@ -1548,7 +1541,7 @@ func main() {
 		var ok bool
 		cpiofilename, ok = arguments["<cpiofile>"].(string)
 		if !ok && arguments["<cpiofile>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if !ok {
 			quit(fmt.Sprintf("Invalid input tar filename: %s", cpiofilename))
@@ -1560,7 +1553,7 @@ func main() {
 		var ok bool
 		newfilename, ok = arguments["<newfile>"].(string)
 		if !ok && arguments["<newfile>"] == nil {
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(1)
 		} else if !ok {
 			quit(fmt.Sprintf("Invalid output filename: %s", newfilename))
@@ -1602,7 +1595,7 @@ func main() {
 		// Write a YAML file
 		check(WriteMetadata(tarfilename, yamlfilename, force, withBody, verbose, expand, root, nouser))
 	} else {
-		fmt.Println(usage)
+		fmt.Print(usage)
 		os.Exit(1)
 	}
 }
