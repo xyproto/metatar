@@ -4,3 +4,6 @@ metatar
 *.bak
 *.tmp
 *~
+test
+examples/missing.cpio
+examples/rename.cpio
