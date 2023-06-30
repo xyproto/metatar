@@ -1,8 +1,8 @@
 # github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 ## explicit
 github.com/docopt/docopt-go
-# github.com/fatih/color v1.13.0
-## explicit; go 1.13
+# github.com/fatih/color v1.15.0
+## explicit; go 1.17
 github.com/fatih/color
 # github.com/gobwas/glob v0.2.3
 ## explicit
@@ -14,25 +14,20 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/kr/pretty v0.1.0
-## explicit
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.16
+# github.com/mattn/go-isatty v0.0.19
 ## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/surma/gocpio v0.0.0-20160926205914-fcb68777e7dc
 ## explicit
 github.com/surma/gocpio
-# github.com/xyproto/yaml v0.0.0-20170425092414-fe7d63e22dd0
-## explicit
+# github.com/xyproto/yaml v1.2.0
+## explicit; go 1.19
 github.com/xyproto/yaml
-# golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab
+# golang.org/x/sys v0.9.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
-## explicit
-# gopkg.in/yaml.v2 v2.2.1
-## explicit
+golang.org/x/sys/windows
