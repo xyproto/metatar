@@ -184,7 +184,7 @@ From `.yaml` to `.tar`:
 
 ## Known issues
 
-* If files are added to the metadata, like for instance `usr/bin/filename`, then `usr/` and `usr/bin/` are created automatically. However, if empty directories are added, the parent directories are not created automatically and has to be added manually to the metadata.
+* If __files__ are added to the metadata with a path, like for instance `usr/bin/filename`, then both `usr/` and `usr/bin/` are created automatically. However, if __empty directories__ are added, the parent directories are not created automatically and has to be added manually to the metadata.
 
 ## General information
 
