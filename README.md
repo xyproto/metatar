@@ -172,7 +172,7 @@ Example:
 
 ## From a tar file to only YAML metadata and back
 
-It is possible to use standalone YAML, without corresponding tar file. The YAML file will be huge.
+It is possible to use standalone YAML, without corresponding tar file. This is experimental and the YAML file will be relatively large.
 
 From `.tar` to `.yaml` (including file data):
 
