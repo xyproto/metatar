@@ -856,6 +856,9 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 			Devminor: mf.Devminor,
 			Size:     int64(len(bodymap[mf.Filename])), // Get size from corresponding file in tarfilename
 		}
+
+		// Build a map of the xattr keys+values from mf.Xattrs
+		hdr.Xattrs = make(map[string]string, len(mf.Xattrs))
 		for _, xattr := range mf.Xattrs {
 			hdr.Xattrs[xattr.Key] = xattr.Value
 		}
