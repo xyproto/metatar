@@ -27,7 +27,7 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.9
+	metatarVersion = 1.9.0
 	metatarName    = "MetaTAR"
 	usage          = `metatar
 
