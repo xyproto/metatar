@@ -1,4 +1,6 @@
-# MetaTAR [![Software License](https://img.shields.io/badge/license-BSD-brightgreen.svg?style=flat-square)](LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/metatar?style=flat-square)](https://goreportcard.com/report/github.com/xyproto/metatar)
+# MetaTAR
+
+[![Software License](https://img.shields.io/badge/license-BSD-brightgreen.svg?style=flat-square)](LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/metatar?style=flat-square)](https://goreportcard.com/report/github.com/xyproto/metatar)
 
 MetaTAR can extract metadata from a tar archive and save it as a YAML file.
 
