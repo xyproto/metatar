@@ -6,7 +6,7 @@ MetaTAR can extract metadata from a tar archive and save it as a YAML file.
 
 The YAML file can then be edited and applied to the original tar archive, in order to produce a new tar archive with changed metadata.
 
-This can be useful for creating filesystem images with device files without having to use fakeroot and mknod.
+**This can be useful for creating filesystem images with device files without having to use `fakeroot` and `mknod`.**
 
 It's also useful for checking in data about file owners and permissions into git. It makes it easier to compare changes and see who changed what.
 
