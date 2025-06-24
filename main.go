@@ -27,9 +27,10 @@ import (
 // * Split large functions into smaller functions.
 
 const (
-	metatarVersion = 1.9.0
-	metatarName    = "MetaTAR"
-	usage          = `metatar
+	metatarVersion      = "1.9.0"
+	metatarVersionFloat = 1.9 // used for versioning of archives
+	metatarName         = "MetaTAR"
+	usage               = `metatar
 
 Usage:
   metatar -s | --save [(-f | --force)] [(-v | --verbose)] [(-d | --data)] [(-e | --expand)] [(-r | --root)] [(-n | --nouser)] <tarfile> <yamlfile>
@@ -408,7 +409,7 @@ func WriteMetadata(tarfilename, yamlfilename string, force, withBody, verbose, e
 
 		// Create the data structure
 		mfs := MetaArchiveRegular{}
-		mfs.Version = metatarVersion
+		mfs.Version = metatarVersionFloat
 
 		// Iterate through the files in the archive.
 		for {
@@ -483,7 +484,7 @@ func WriteMetadata(tarfilename, yamlfilename string, force, withBody, verbose, e
 
 		// Create the data structure
 		mfs := MetaArchiveExpanded{}
-		mfs.Version = metatarVersion
+		mfs.Version = metatarVersionFloat
 
 		// Iterate through the files in the archive.
 		for {
@@ -684,7 +685,7 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 	}
 
 	// Check the metadata version
-	if mfs.Version > metatarVersion {
+	if mfs.Version > metatarVersionFloat {
 		if verbose {
 			fmt.Printf("YML metadata is from the future, from MetaTAR %v\n", mfs.Version)
 		}
@@ -1236,7 +1237,7 @@ func ApplyMetadataToCpio(tarfilename, yamlfilename, newfilename string, force, w
 	}
 
 	// Check the metadata version
-	if mfs.Version > metatarVersion {
+	if mfs.Version > metatarVersionFloat {
 		if verbose {
 			fmt.Printf("YML metadata is from the future, from MetaTAR %v\n", mfs.Version)
 		}
@@ -1390,12 +1391,12 @@ func MergeMetadata(yamlfilename1, yamlfilename2, newfilename string, force, verb
 	}
 
 	// Check the metadata version
-	if mfs1.Version > metatarVersion {
+	if mfs1.Version > metatarVersionFloat {
 		if verbose {
 			fmt.Printf("YML metadata for %s is from the future, from MetaTAR %v\n", yamlfilename1, mfs1.Version)
 		}
 	}
-	if mfs2.Version > metatarVersion {
+	if mfs2.Version > metatarVersionFloat {
 		if verbose {
 			fmt.Printf("YML metadata for %s is from the future, from MetaTAR %v\n", yamlfilename2, mfs2.Version)
 		}
@@ -1488,7 +1489,7 @@ UP:
 }
 
 func main() {
-	arguments, _ := docopt.Parse(usage, nil, true, fmt.Sprintf("%s %v", metatarName, metatarVersion), false)
+	arguments, _ := docopt.Parse(usage, nil, true, metatarName+" "+metatarVersion, false)
 
 	//fmt.Println(arguments)
 
