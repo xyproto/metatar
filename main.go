@@ -809,8 +809,7 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 		if mf.StripEmptyLines {
 			// Strip empty lines from the data in bodymap[mf.Filename]
 			s := string(bodymap[mf.Filename])
-			re, err := regexp.Compile("\n\n")
-			check(err)
+			re := regexp.MustCompile("\n\n+")
 			bodymap[mf.Filename] = []byte(re.ReplaceAllString(s, "\n"))
 		}
 
@@ -1023,7 +1022,7 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		// TODO: Check if mf.Filename exists in bodymap
 		// Strip empty lines from the data in bodymap[mf.Filename]
 		s := string(bodymap[mf.Filename])
-		re := regexp.MustCompile("\n\n")
+		re := regexp.MustCompile("\n\n+")
 		bodymap[mf.Filename] = []byte(re.ReplaceAllString(s, "\n"))
 	}
 
