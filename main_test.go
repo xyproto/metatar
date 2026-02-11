@@ -32,6 +32,6 @@ func TestHasGlob(t *testing.T) {
 		t.Error("Wrong: List should match \"kakeeeeee\"")
 	}
 	if !hasglob(l, "pepperkake") {
-		t.Error("Wrong: List should match \"kakeeeeee\"")
+		t.Error("Wrong: List should match \"pepperkake\"")
 	}
 }

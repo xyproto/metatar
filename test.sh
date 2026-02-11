@@ -23,7 +23,7 @@ grep -q 'hello.txt' hello.yml && echo ok || (echo FAIL; exit 1)
 
 # TAR + YAML -> TAR
 echo -ne 'Testing metadata application:\tTAR + YAML -> TAR...\t'
-echo '  Rename: hi.txt' >> hello.yml
+echo '      Rename: hi.txt' >> hello.yml
 ./metatar -a hello.tar hello.yml hello2.tar
 rm -f hello.tar hello.yml
 tar xf hello2.tar
