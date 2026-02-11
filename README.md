@@ -190,6 +190,6 @@ From `.yaml` to `.tar`:
 
 ## General information
 
-* Version: 1.9.1
+* Version: 1.9.2
 * License: BSD-3
 * Author: Alexander F. Rødseth
