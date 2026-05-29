@@ -1,8 +1,8 @@
 # github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 ## explicit
 github.com/docopt/docopt-go
-# github.com/fatih/color v1.18.0
-## explicit; go 1.17
+# github.com/fatih/color v1.19.0
+## explicit; go 1.25.0
 github.com/fatih/color
 # github.com/gobwas/glob v0.2.3
 ## explicit
@@ -17,8 +17,8 @@ github.com/gobwas/glob/util/strings
 # github.com/mattn/go-colorable v0.1.14
 ## explicit; go 1.18
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.20
-## explicit; go 1.15
+# github.com/mattn/go-isatty v0.0.22
+## explicit; go 1.21
 github.com/mattn/go-isatty
 # github.com/surma/gocpio v0.0.0-20160926205914-fcb68777e7dc
 ## explicit
@@ -26,7 +26,7 @@ github.com/surma/gocpio
 # github.com/xyproto/yaml v1.2.0
 ## explicit; go 1.19
 github.com/xyproto/yaml
-# golang.org/x/sys v0.41.0
-## explicit; go 1.24.0
+# golang.org/x/sys v0.45.0
+## explicit; go 1.25.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
