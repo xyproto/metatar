@@ -28,7 +28,7 @@ Note that CPIO archives are ordered, and that files/directories must exist befor
 
 ## Quick installation
 
-If you have a recent version of `go` installed:
+If you have a recent version of Go:
 
     go install github.com/xyproto/metatar@latest
 
