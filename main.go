@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -334,8 +335,8 @@ func stripUserGroup(inputbuf bytes.Buffer) bytes.Buffer {
 	var buf bytes.Buffer
 	newlines := []string{}
 
-	lines := strings.Split(inputbuf.String(), "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(inputbuf.String(), "\n")
+	for line := range lines {
 		trimline := strings.TrimSpace(line)
 		if strings.HasPrefix(trimline, "Username:") {
 			continue
@@ -817,7 +818,7 @@ func ApplyMetadataToTar(tarfilename, yamlfilename, newfilename string, force, wi
 			// Remove bash comments, skip the first line
 			s := string(bodymap[mf.Filename])
 			l := []string{}
-			for _, line := range strings.Split(s, "\n") {
+			for line := range strings.SplitSeq(s, "\n") {
 				if strings.HasPrefix(line, "#!") {
 					l = append(l, line)
 					continue
@@ -1031,7 +1032,7 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 		// Remove bash comments, skip the first line
 		s := string(bodymap[mf.Filename])
 		l := []string{}
-		for _, line := range strings.Split(s, "\n") {
+		for line := range strings.SplitSeq(s, "\n") {
 			if strings.HasPrefix(line, "#!") {
 				l = append(l, line)
 				continue
@@ -1182,12 +1183,7 @@ func addFileToCPIO(cw *cpio.Writer, mf MetaFileExpanded, tarfilename, yamlfilena
 
 // Given a slice of strings and a string, figure out if the string is present
 func hasl(l []string, e string) bool {
-	for _, x := range l {
-		if x == e {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(l, e)
 }
 
 // Given a slice of strings that are regular expressions, and a string, figure out if the string matches any of the regular expressions
