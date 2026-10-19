@@ -1,3 +1,5 @@
+<img alt="MetaTAR logo" src="img/metatar_transparent.svg" width="35%">
+
 # MetaTAR
 
 [![Build](https://github.com/xyproto/metatar/actions/workflows/build.yml/badge.svg)](https://github.com/xyproto/metatar/actions/workflows/build.yml)
