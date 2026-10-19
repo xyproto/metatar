@@ -1,4 +1,4 @@
-<img alt="MetaTAR logo" src="img/metatar_transparent.svg" width="15%" align="right">
+<img alt="MetaTAR logo" src="img/metatar_transparent.svg" width="12%" align="right">
 
 # MetaTAR
 
